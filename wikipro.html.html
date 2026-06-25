@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aviapedia OS – Global Flight Intelligence</title>
+    <style>
+        /* --- NOWOCZESNY SYSTEM DESIGNU (DARK COMMMAND CENTER) --- */
+        :root {
+            --bg-main: #0b0f19;
+            --bg-sidebar: #111827;
+            --bg-card: #1f2937;
+            --accent-blue: #3b82f6;
+            --accent-glow: #60a5fa;
+            --accent-green: #10b981;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --glass-bg: rgba(31, 41, 55, 0.6);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+        }
+
+        body {
+            font-family: '-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* --- UKŁAD INTERFEJSU --- */
+        .app-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+
+        /* --- SIDEBAR (PANEL DOWODZENIA) --- */
+        aside {
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 35px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.35rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: #fff;
+            text-transform: uppercase;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+        }
+
+        .brand-logo span {
+            color: var(--accent-blue);
+            text-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+        }
+
+        .nav-section h3 {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .nav-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background-color: rgba(59, 130, 246, 0.15);
+            color: #fff;
+            box-shadow: inset 3px 0 0 var(--accent-blue);
+        }
+
+        /* --- PANEL GŁÓWNY --- */
+        main {
+            padding: 40px 60px;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* --- NOWOCZESNY SELEKTOR MAREK --- */
+        .brand-selector-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            background: var(--bg-sidebar);
+            padding: 15px 25px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .selector-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .tabs-container {
+            display: flex;
+            gap: 10px;
+            background: rgba(0,0,0,0.2);
+            padding: 5px;
+            border-radius: 8px;
+        }
+
+        .brand-tab {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 10px 24px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .brand-tab:hover {
+            color: #fff;
+        }
+
+        .brand-tab.active {
+            background-color: var(--accent-blue);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        /* --- SYSTEM POWIADOMIEŃ I STATUSÓW --- */
+        #info-bar {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            padding: 16px 24px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            backdrop-filter: blur(8px);
+        }
+
+        #info-text {
+            font-weight: 600;
+            color: var(--accent-green);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .return-btn {
+            color: var(--accent-blue);
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+
+        /* --- ARTYKUŁY ENCYKLOPEDYCZNE --- */
+        .brand-page {
+            display: none;
+        }
+        
+        .brand-page.active {
+            display: block;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        .wiki-article {
+            background: var(--glass-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 35px;
+            margin-bottom: 40px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .article-header {
+            margin-bottom: 25px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        .article-header h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(90deg, #fff, var(--text-muted));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .article-content {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 40px;
+            align-items: flex-start;
+        }
+
+        @media (max-width: 1100px) {
+            .article-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* --- TEKST I AKAPITY --- */
+        .article-text p {
+            margin-bottom: 20px;
+            color: #e5e7eb;
+            text-align: justify;
+            font-size: 1.05rem;
+        }
+
+        .article-text p strong {
+            color: #fff;
+        }
+
+        .article-text h2 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #fff;
+            margin-top: 35px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .article-text h2::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 18px;
+            background: var(--accent-blue);
+            border-radius: 2px;
+        }
+
+        .article-text ul {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+
+        .article-text li {
+            position: relative;
+            padding-left: 20px;
+            margin-bottom: 10px;
+            color: var(--text-muted);
+        }
+
+        .article-text li::before {
+            content: '▹';
+            position: absolute;
+            left: 0;
+            color: var(--accent-blue);
+        }
+
+        .article-text li strong {
+            color: #fff;
+        }
+
+        /* --- AVIONICS INFOBOX (KARTA PREMIUM) --- */
+        .infobox {
+            background: #111827;
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+
+        .infobox-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 15px;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Karta z wektorowym blueprintem statku */
+        .blueprint-canvas {
+            width: 100%;
+            height: 150px;
+            background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+            border: 1px dashed rgba(59, 130, 246, 0.3);
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .infobox table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .infobox th, .infobox td {
+            padding: 10px 6px;
+            font-size: 0.88rem;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            vertical-align: top;
+        }
+
+        .infobox th {
+            color: var(--text-muted);
+            font-weight: 600;
+            text-align: left;
+            width: 40%;
+        }
+
+        .infobox td {
+            color: #fff;
+            font-weight: 500;
+            text-align: right;
+        }
+
+        /* --- TABELA AGREGACYJNA (SPIS TECHNICZNY) --- */
+        .tech-table-container {
+            background: var(--bg-sidebar);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 25px;
+        }
+
+        .tech-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .tech-table th, .tech-table td {
+            padding: 16px 20px;
+            font-size: 0.95rem;
+        }
+
+        .tech-table th {
+            background-color: rgba(255,255,255,0.02);
+            color: var(--text-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tech-table tr {
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+        }
+
+        .tech-table tr:hover {
+            background-color: rgba(255,255,255,0.01);
+        }
+
+        .tech-table td strong {
+            color: var(--accent-glow);
+        }
+
+        /* --- SPECYFICZNE SEKCJE KATEGORII --- */
+        .category-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        @media(max-width: 768px) {
+            .category-grid { grid-template-columns: 1fr; }
+        }
+
+        .category-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 25px;
+        }
+
+        .category-card h2 {
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            color: var(--accent-glow);
+        }
+
+        /* --- ANIMACJE --- */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* RESPONSIVE BREAKDOWN */
+        @media (max-width: 900px) {
+            .app-container { grid-template-columns: 1fr; }
+            aside { height: auto; position: relative; padding: 20px; gap: 15px; }
+            main { padding: 20px; }
+            .brand-selector-wrapper { flex-direction: column; gap: 15px; align-items: stretch; }
+            .tabs-container { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <aside>
+            <div class="brand-logo" onclick="pokazStroneGlowna()">
+                <span>✈</span> Aviapedia OS
+            </div>
+            
+            <div class="nav-section">
+                <h3>Nawigacja</h3>
+                <ul class="nav-menu">
+                    <li><a class="nav-item active" id="menu-home" onclick="pokazStroneGlowna()">📊 Panel główny</a></li>
+                    <li><a class="nav-item" id="menu-random" onclick="losujArtykul()">🎲 Losowy model</a></li>
+                    <li><a class="nav-item" id="menu-cat" onclick="filtrujSekcje('kategorie')">📂 Kategorie maszyn</a></li>
+                    <li><a class="nav-item" id="menu-tech" onclick="filtrujSekcje('spis')">📋 Specyfikacje</a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <main>
+            
+            <div class="brand-selector-wrapper" id="main-brand-selector">
+                <div class="selector-label">FILTR REJESTRU PRODUCENTÓW</div>
+                <div class="tabs-container">
+                    <button class="brand-tab active" id="btn-airbus" onclick="zmienMarke('airbus-section', this)">Airbus Corporation</button>
+                    <button class="brand-tab" id="btn-boeing" onclick="zmienMarke('boeing-section', this)">Boeing Commercial</button>
+                </div>
+            </div>
+
+            <div id="info-bar" style="display:none;">
+                <span id="info-text"></span> 
+                <span class="return-btn" onclick="pokazStroneGlowna()">✕ Zamknij podgląd</span>
+            </div>
+
+            <div id="airbus-section" class="brand-page active">
+                
+                <div class="wiki-article" id="art-a220">
+                    <div class="article-header">
+                        <h1>Airbus A220</h1>
+                    </div>
+                    <div class="article-content">
+                        <div class="infobox">
+                            <div class="infobox-title">Airbus A220</div>
+                            <div class="blueprint-canvas">
+                                <svg width="100" height="100" viewBox="0 0 100 100" fill="none" stroke="#60a5fa" stroke-width="1.5"><path d="M50 10 L50 90 M15 45 L85 45 M35 80 L65 80" opacity="0.4"/><circle cx="50" cy="45" r="3" fill="#60a5fa"/></svg>
+                            </div>
+                            <table>
+                                <tr><th>Klasa</th><td>Wąskokadłubowy krótkiego zasięgu</td></tr>
+                                <tr><th>Pierwszy oblot</th><td>16 września 2013</td></tr>
+                                <tr><th>Układ napędowy</th><td>Pratt & Whitney PW1500G</td></tr>
+                            </table>
+                        </div>
+                        <div class="article-text">
+                            <p><strong>Airbus A220</strong> to nowoczesna rodzina wąskokadłubowych samolotów pasażerskich, stworzona pierwotnie przez kanadyjską firmę Bombardier jako program CSeries. Po geopolitycznym sporze celnym z rządem USA i konkurencyjnym Boeingiem, Airbus odkupił większościowy pakiet akcji programu za symbolicznego dolara, zmieniając nazwę konstrukcji i integrując ją ze swoim globalnym łańcuchem dostaw.</p>
+                            <h2>Konstrukcja i Wydajność</h2>
+                            <p>Konstrukcja opiera się na innowacyjnych stopach aluminiowo-litowych oraz kompozytach węglowych, co redukuje masę własną statku powietrznego. Wyposażony w ultranowoczesne, przekładniowe silniki turbowentylowe Pratt & Whitney, samolot zużywa do 25% mniej paliwa na jedno miejsce pasażerskie niż starsze generacje maszyn regionalnych.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wiki-article" id="art-a320">
+                    <div class="article-header">
+                        <h1>Airbus A320</h1>
+                    </div>
+                    <div class="article-content">
+                        <div class="infobox">
+                            <div class="infobox-title">Airbus A320</div>
+                            <div class="blueprint-canvas">
+                                <svg width="100" height="100" viewBox="0 0 100 100" fill="none" stroke="#60a5fa" stroke-width="1.5"><path d="M50 10 L50 90 M10 40 L90 40 M38 82 L62 82" opacity="0.4"/><circle cx="50" cy="40" r="4" fill="#60a5fa"/></svg>
+                            </div>
+                            <table>
+                                <tr><th>Klasa</th><td>Wąskokadłubowy średniego zasięgu</td></tr>
+                                <tr><th>Pierwszy oblot</th><td>22 lutego 1987</td></tr>
+                                <tr><th>Innowacja</th><td>Cyfrowy system Fly-by-wire</td></tr>
+                            </table>
+                        </div>
+                        <div class="article-text">
+                            <p><strong>Airbus A320</strong> to absolutny filar europejskiego przemysłu lotniczego i bezpośredni konkurent legendarnego Boeinga 737. Projekt zrodził się w latach 80. jako śmiała próba przełamania amerykańskiego monopolu na rynku masowych przewozów pasażerskich średniego zasięgu.</p>
+                            <h2>Cyfrowy Wolant Boczny i Automatyzacja</h2>
+                            <p>A320 zapisał się w historii jako pierwszy samolot pasażerski z pełnym cyfrowym systemem sterowania przewodowego (Fly-by-wire) oraz bocznymi drążkami sterującymi (sidestick) zamiast klasycznej kolumny wolantu. Systemy komputerowe monitorują ruchy pilota, filtrując komendy tak, by parametry aerodynamiczne nigdy nie przekroczyły bezpiecznej granicy obciążeń konstrukcji skrzydeł i kadłuba.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wiki-article" id="art-a340">
+                    <div class="article-header">
+                        <h1>Airbus A340</h1>
+                    </div>
+                    <div class="article-content">
+                        <div class="infobox">
+                            <div class="infobox-title">Airbus A340</div>
+                            <div class="blueprint-canvas">
+                                <svg width="100" height="100" viewBox="0 0 100 100" fill="none" stroke="#10b981" stroke-width="1.5"><path d="M50 5 L50 95 M5 42 L95 42 M35 85 L65 85" opacity="0.3"/><circle cx="30" cy="45" r="2" fill="#10b981"/><circle cx="40" cy="44" r="2" fill="#10b981"/><circle cx="60" cy="44" r="2" fill="#10b981"/><circle cx="70" cy="45" r="2" fill="#10b981"/></svg>
+                            </div>
+                            <table>
+                                <tr><th>Klasa</th><td>Szerokokadłubowy dalekiego zasięgu</td></tr>
+                                <tr><th>Pierwszy oblot</th><td>25 października 1991</td></tr>
+                                <tr><th>Warianty bazowe</th><td>-200, -300, -500, -600</td></tr>
+                            </table>
+                        </div>
+                        <div class="article-text">
+                            <p><strong>Airbus A340</strong> to długodystansowy, szerokokadłubowy samolot pasażerski napędzany czterema silnikami turbowentylowymi, opracowany przez konsorcjum Airbus równolegle z dwusilnikowym bliźniakiem A330. Konstrukcja ta powstała pod koniec lat 80. z myślą o bezpiecznym pokonywaniu najdłuższych tras transoceanicznych w czasach, gdy przepisy restrykcyjnie ograniczały loty maszyn dwusilnikowych daleko od lądowisk awaryjnych (restrykcje ETOPS).</p>
+                            <h2>Rywalizacja i Specyfikacja</h2>
+                            <p>A340 charakteryzował się potężnym zasięgiem i był bezpośrednią, bardziej ekonomiczną alternatywą dla amerykańskiego Jumbo Jeta. Wersja A340-600 przez wiele lat dzierżyła tytuł najdłuższego samolotu pasażerskiego na świecie, wyróżniając się niezwykle smukłą i długą sylwetką kadłuba. Z powodu gwałtownego wzrostu cen ropy, model ten ustąpił miejsca nowocześniejszym dwusilnikowcom.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wiki-article" id="art-a350">
+                    <div class="article-header">
+                        <h1>Airbus A350 XWB</h1>
+                    </div>
+                    <div class="article-content">
+                        <div class="infobox">
+                            <div class="infobox-title">Airbus A350 XWB</div>
+                            <div class="blueprint-canvas">
+                                <svg width="100" height="100" viewBox="0 0 100 100" fill="none" stroke="#60a5fa" stroke-width="1.5"><path d="M50 5 L50 95 M2 38 Q50 45 98 38 M36 84 L64 84" opacity="0.4"/><circle cx="50" cy="40" r="5" fill="#60a5fa"/></svg>
+                            </div>
+                            <table>
+                                <tr><th>Klasa</th><td>Zaawansowany szerokokadłubowy</td></tr>
+                                <tr><th>Pierwszy oblot</th><td>14 czerwca 2013</td></tr>
+                                <tr><th>Materiały</th><td>53% włókna węglowe (CFRP)</td></tr>
+                            </table>
+                        </div>
+                        <div class="article-text">
+                            <p><strong>Airbus A350 XWB</strong> to technologiczne arcydzieło europejskiego lotnictwa cywilnego. Zaprojektowany jako bezpośrednia odpowiedź na Dreamlinera i Boeinga 777, stał się nowym wyznacznikiem oszczędności na trasach transoceanicznych.</p>
+                            <h2>Biomimikra i Zaawansowane Skrzydła</h2>
+                            <p>Profil skrzydeł A350 wzorowano na aerodynamice skrzydeł ptaków drapieżnych. Komputery pokładowe w trybie ciągłym korygują geometrię klap i lotek podczas lotu, dopasowując się to aktualnych podmuchów wiatru. Kadłub wykonany z polimerów zbrojonych włóknem węglowym (CFRP) pozwala utrzymać optymalne ciśnienie i wysoką wilgotność w kabinie.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wiki-article" id="art-a380">
+                    <div class="article-header">
+                        <h1>Airbus A380 Superjumbo</h1>
+                    </div>
+                    <div class="article-content">
+                        <div class="infobox">
+                            <div class="infobox-title">Airbus A380</div>
+                            <div class="blueprint-canvas">
+                                <svg width="100" height="100" viewBox="0 0 100 100" fill="none" stroke="#10b981" stroke-width="1.5"><path d="M50 5 L50 95 M0 45 L100 45 M32 86 L68 86" opacity="0.4"/><rect x="46" y="30" width="8" height="40" fill="rgba(16,185,129,0.2)" stroke="#10b981"/></svg>
+                            </div>
+                            <table>
+                                <tr><th>Klasa</th><td>Dwupokładowy szerokokadłubowy gigant</td></tr>
+                                <tr><th>Pierwszy oblot</th><td>27 kwietnia 2005</td></tr>
+                                <tr><th>Maks. pojemność</th><td>Do 853 pasażerów</td></tr>
+                            </table>
+                        </div>
+                        <div class="article-text">
+                            <p><strong>Airbus A380</strong>, znany na całym świecie jako "Superjumbo", to monumentalny, dwupokładowy gigant i największy seryjnie produkowany samolot pasażerski w historii ludzkości. Projekt ten powstał na przełomie wieków jako rynkowe uderzenie w wieloletni monopol amerykańskiego Boeinga 747. Inżynierowie stworzyli podniebny liniowiec oferujący dwa pełnowymiarowe pokłady pasażerskie na całej długości gigantycznego kadłuba.</p>
+                            <h2>Podniebny Luksus i Wyzwania Rynkowe</h2>
+                            <p>Niezwykła przestrzeń wewnętrzna pozwoliła liniom lotniczym (głównie z Bliskiego Wschodu i Azji) na zaaranżowanie udogodnień niespotykanych dotąd w masowej komunikacji. W strukturach A380 znalazły się m.in. luksusowe zamykane apartamenty pierwszej klasy, bary koktajlowe, a nawet pełnowymiarowe kabiny prysznicowe. Mimo ogromnego sukcesu wizerunkowego, wysokie koszty eksploatacji czterech silników sprawiły, że Airbus zakończył produkcję tego modelu w 2021 roku.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div id="boeing-section" class="brand-page">
+                
+                <div class="wiki-article" id="art-b717">
+                    <div class="article-header">
+                        <h1>Boeing 717 (Adoptowane dziecko Boeinga)</h1>
+                    </div>
+                    <div class="article-content">
+                        <div class="infobox">
+                            <div class="infobox-title">Boeing 717</div>
+                            <div class="blueprint-canvas">
+                                <svg width="100" height="100" viewBox="0 0 100 100" fill="none" stroke="#60a5fa" stroke-width="1.5"><path d="M50 10 L50 90 M18 55 L82 55 M32 15 L68 15" opacity="0.3"/><circle cx="43" cy="80" r="2" fill="#60a5fa"/><circle cx="57" cy="80" r="2" fill="#60a5fa"/></svg>
+                            </div>
+                            <table>
+                                <tr><th>Klasa</th><td>Wąskokadłubowy krótkiego zasięgu</td></tr>
+                                <tr><th>Pierwszy oblot</th><td>2 września 1998</td></tr>
+                                <tr><th>Konstrukcja bazowa</th><td>McDonnell Douglas MD-95</td></tr>
+                            </table>
+                        </div>
+                        <div class="article-text">
+                            <p><strong>Boeing 717</strong> to dwusilnikowy, wąskokadłubowy samolot pasażerski stworzony z myślą o rynkach lokalnych i bardzo częstych, krótkich lotach regionalnych. Model ten zajmuje unikalne miejsce w historii awiacji – nie został bowiem zaprojektowany przez Boeinga. Samolot ten narodził się na deskach kreślarskich firmy McDonnell Douglas jako model MD-95. Kiedy w 1997 roku doszło do wielkiej fuzji i przejęcia McDonnell Douglasa przez koncern Boeing, projekt został przemianowany na Boeinga 717 i wprowadzony do seryjnej produkcji.</p>
+                            <h2>Konstrukcja i Dziedzictwo</h2>
+                            <p>Z perspektywy inżynieryjnej, 717 jest bezpośrednim spadkobiercą legendarnej linii samolotów DC-9 oraz MD-80. Zachował charakterystyczny układ z silnikami zamontowanymi z tyłu kadłuba oraz ogon w kształcie litery T. Boeing wyposażył go jednak w nowoczesny, cyfrowy kokpit typu glass-cockpit oraz bardzo wydajne silniki Rolls-Royce BR715. Maszyna zyskała miano niezwykle bezawaryjnej w trudnych warunkach intensywnego użytkowania regionalnego.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wiki-article" id="art-b727">
+                    <div class="article-header">
+                        <h1>Boeing 727</h1>
+                    </div>
+                    <div class="article-content">
+                        <div class="infobox">
+                            <div class="infobox-title">Boeing 727</div>
+                            <div class="blueprint-canvas">
+                                <svg width="100" height="100" viewBox="0 0 100 100" fill="none" stroke="#60a5fa" stroke-width="1.5"><path d="M50 10 L50 90 M12 50 L88 50 M32 15 L68 15" opacity="0.3"/><circle cx="42" cy="78" r="2" fill="#60a5fa"/><circle cx="50" cy="84" r="2" fill="#60a5fa"/><circle cx="58" cy="78" r="2" fill="#60a5fa"/></svg>
+                            </div>
+                            <table>
+                                <tr><th>Klasa</th><td>Wąskokadłubowy z ogonem T</td></tr>
+                                <tr><th>Pierwszy oblot</th><td>9 lutego 1963</td></tr>
+                                <tr><th>Liczba silników</th><td>3 odrzutowe na ogonie</td></tr>
+                            </table>
+                        </div>
+                        <div class="article-text">
+                            <p><strong>Boeing 727</strong> to legendarny, trój silnikowy samolot pasażerski, który zdominował niebo w drugiej połowie XX wieku. Stworzony z myślą o operowaniu z mniejszych, regionalnych lotnisk o krótkich pasach startowych, na których potężny Boeing 707 nie był w stanie bezpiecznie wylądować.</p>
+                            <h2>Innowacje Aerodynamiczne</h2>
+                            <p>Aby samolot mógł bezpiecznie lądować na krótkich pasach, wyposażono go w rewolucyjne klapy przednie oraz potrójnie szczelinowe klapy tylne, generujące ogromną siłę nośną przy małych prędkościach. Posiadał wbudowane, wysuwane schody w ogonie, co uniezależniało go od infrastruktury naziemnej.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wiki-article" id="art-b737">
+                    <div class="article-header">
+                        <h1>Boeing 737 (Krajowy koń roboczy globalnej awiacji)</h1>
+                    </div>
+                    <div class="article-content">
+                        <div class="infobox">
+                            <div class="infobox-title">Boeing 737</div>
+                            <div class="blueprint-canvas">
+                                <svg width="100" height="100" viewBox="0 0 100 100" fill="none" stroke="#60a5fa" stroke-width="1.5"><path d="M50 12 L50 88 M14 42 L86 42 M36 78 L64 78" opacity="0.4"/><circle cx="50" cy="42" r="4" fill="#60a5fa"/></svg>
+                            </div>
+                            <table>
+                                <tr><th>Klasa</th><td>Wąskokadłubowy średniego zasięgu</td></tr>
+                                <tr><th>Pierwszy oblot</th><td>9 kwietnia 1967</td></tr>
+                                <tr><th>Egzemplarze</th><td>Ponad 11 000 sztuk</td></tr>
+                                <tr><th>Aktualna seria</th><td>737 MAX (-7/-8/-9/-10)</td></tr>
+                            </table>
+                        </div>
+                        <div class="article-text">
+                            <p><strong>Boeing 737</strong> to bezapelacyjnie najpopularniejszy i najlepiej sprzedający się wąskokadłubowy samolot pasażerski w historii lotnictwa komercyjnego. Ta legendarna, amerykańska konstrukcja średniego zasięgu została zaprojektowana w latach 60. XX wieku jako tańsze, mniejsze uzupełnienie floty obok modeli 707 i 727. Przez ponad pół wieku maszyna przechodziła głębokie metamorfozy techniczne, stając się absolutnym fundamentem operacyjnym dla setek linii lotniczych na całym globie – od gigantów niskokosztowych jak Ryanair, Southwest Airlines czy Buzz, po tradycyjnych przewoźników sieciowych.</p>
+                            <h2>Ewolucja Generacji: Od Original do serii MAX</h2>
+                            <p>Architektura techniczna Boeinga 737 dzieli się na cztery główne generacje. Pierwsza, zwana <strong>Original</strong> (modele -100 i -200), napędzana była charakterystycznymi, długimi i wąskimi silnikami Pratt & Whitney JT8D. W latach 80. nadeszła generacja <strong>Classic</strong> (-300, -400, -500), w której wprowadzono nowoczesne silniki CFM56. Z racji niskiego prześwitu samolotu, inżynierowie musieli spłaszczyć od dołu osłony silników, co nadało im kultowy kształt "chomika". Pod koniec lat 90. zadebiutowała rewolucyjna generacja <strong>Next Generation / NG</strong> (-600, -700, -800, -900), która przyniosła całkowicie nowe skrzydła i zaawansowaną awionikę. Najnowszą odsłoną jest wprowadzona w XXI wieku seria <strong>MAX</strong>, oferująca potężne silniki CFM LEAP-1B i charakterystyczne, rozdwojone winglety, radykalnie redukujące zużycie paliwa.</p>
+                            <h2>Unikalne Cechy Konstrukcyjne</h2>
+                            <p>Jedną z najbardziej unikalnych cech inżynieryjnych Boeinga 737 jest całkowity brak klap podwozia głównego. Po schowaniu kół w powietrzu, opony pozostają bezpośrednio widoczne od spodu kadłuba, idealnie uszczelniając luk aerodynamiczny za pomocą specjalnych gumowych kołnierzy. Takie rozwiązzenie pozwoliło zaoszczędzić setki kilogramów masy mechanizmów hydraulicznych i uprościło serwisowanie maszyny w bazach technicznych.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wiki-article" id="art-b747">
+                    <div class="article-header">
+                        <h1>Boeing 747 Jumbo Jet (Królowa Przestworzy)</h1>
+                    </div>
+                    <div class="article-content">
+                        <div class="infobox">
+                            <div class="infobox-title">Boeing 747</div>
+                            <div class="blueprint-canvas">
+                                <svg width="100" height="100" viewBox="0 0 100 100" fill="none" stroke="#10b981" stroke-width="1.5"><path d="M50 5 L50 95 M2 46 L98 46 M34 84 L66 84" opacity="0.4"/><path d="M47 15 C 47 15, 50 10, 53 15 L53 35 L47 35 Z" fill="rgba(16,185,129,0.2)" stroke="#10b981"/></svg>
+                            </div>
+                            <table>
+                                <tr><th>Klasa</th><td>Czterosilnikowy szerokokadłubowy ciężki</td></tr>
+                                <tr><th>Pierwszy oblot</th><td>9 lutego 1969</td></tr>
+                                <tr><th>Zasięg operacyjny</th><td>14 320 km (Wersja -8i)</td></tr>
+                                <tr><th>Cechy wizualne</th><td>Aerodynamiczny górny garb</td></tr>
+                            </table>
+                        </div>
+                        <div class="article-text">
+                            <p><strong>Boeing 747</strong>, powszechnie i z ogromnym szacunkiem nazywany "Jumbo Jetem" lub "Królową Przestworzy" (Queen of the Skies), to jeden z najważniejszych i najbardziej rozpoznawalnych samolotów w dziejach ludzkości. Był to pierwszy na świecie szerokokadłubowy samolot pasażerski o imponującym zasięgu międzykontynentalnym. Jego wejście do służby w 1970 roku zrewolucjonizowało transport masowy, drastycznie obniżając ceny biletów lotniczych i otwierając możliwość globalnych podróży dla zwykłych obywateli. Samolot wyróżnia się charakterystyczną, unikalną sylwetką z częściowym drugim pokładem, tworzącym potężny, aerodynamiczny garb w przedniej części kadłuba.</p>
+                            <h2>Geneza Garbu i Architektura Cargo</h2>
+                            <p>Co ciekawe, kultowy garb Boeinga 747 nie powstał z pobudek estetycznych ani chęci stworzenia luksusowej strefy. Pod koniec lat 60. inżynierowie byli przekonani, że przyszłość pasażerska należy wyłącznie do maszyn naddźwiękowych (takich jak Concorde). Projektowano więc 747 jako maszynę przejściową, która po spadku zainteresowania pasażerów miała zostać łatwo zaadaptowana jako samolot towarowy (Cargo). Umieszczenie kokpitu na górnym pokładzie zwolniło przestrzeń w nosie samolotu, co umożliwiło zainstalowanie potężnych wrót przednich otwieranych hydraulicznie do góry. Pozwala to na ładowanie gigantycznych ładunków bezpośrednio na całą długość dolnego pokładu.</p>
+                            <h2>Dziedzictwo i Służba Państwowa</h2>
+                            <p>Boeing 747 stał się również stałym elementem amerykańskiej dyplomacji i obronności. Dwa specjalnie zmodyfikowane egzemplarze (oznaczone symbolem wojskowym VC-25A) służą jako prezydencki <strong>Air Force One</strong>, wyposażony w systemy obrony przeciwrakietowej oraz ekranowanie przed impulsem elektromagnetycznym po wybuchu jądrowym. Choć produkcja seryjna tego giganta zakończyła się oficjalnie na początku 2023 roku dostawą wersji towarowej 747-8F, maszyny te będą widoczne na niebie jeszcze przez wiele dekad jako niezrównane frachtowce dalekiego zasięgu.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wiki-article" id="art-b777">
+                    <div class="article-header">
+                        <h1>Boeing 777 (Dwusilnikowy Kolos Transoceaniczny)</h1>
+                    </div>
+                    <div class="article-content">
+                        <div class="infobox">
+                            <div class="infobox-title">Boeing 777</div>
+                            <div class="blueprint-canvas">
+                                <svg width="100" height="100" viewBox="0 0 100 100" fill="none" stroke="#60a5fa" stroke-width="1.5"><path d="M50 5 L50 95 M1 40 L99 40 M35 83 L65 83" opacity="0.4"/><circle cx="34" cy="46" r="5" fill="#60a5fa"/><circle cx="66" cy="46" r="5" fill="#60a5fa"/></svg>
+                            </div>
+                            <table>
+                                <tr><th>Klasa</th><td>Szerokokadłubowy dalekiego zasięgu</td></tr>
+                                <tr><th>Pierwszy oblot</th><td>12 czerwca 1994</td></tr>
+                                <tr><th>Silniki rekordowe</th><td>General Electric GE90 / GE9X</td></tr>
+                                <tr><th>Główne podwozie</th><td>Wózki 6-kołowe (łącznie 12)</td></tr>
+                            </table>
+                        </div>
+                        <div class="article-text">
+                            <p><strong>Boeing 777</strong> (powszechnie znany jako "Triple Seven") to zaawansowany technologicznie, szerokokadłubowy samolot dalekiego zasięgu, który na zawsze odmienił ekonomię lotów transoceanicznych. Projekt zrodził się na początku lat 90. jako odpowiedź na zapotrzebowanie linii lotniczych szukających bezpośredniego następcy starszych modeli szerokokadłubowych, ale opartego wyłącznie na dwóch silnikach zamiast trzech lub czterech. Sukces Boeinga 777 przypieczętował los takich maszyn jak Airbus A340 czy McDonnell Douglas MD-11, udowadniając, że dwa silniki są w stanie bezpiecznie i znacznie taniej przewieźć do 450 pasażerów na odległości przekraczające 15 000 kilometrów.</p>
+                            <h2>Cyfrowa Rewolucja CAD i Konstrukcja Bez Makiet</h2>
+                            <p>Program budowy Boeinga 777 zapisał się w historii informatyki i inżynierii jako pierwszy projekt mechaniczny tej skali, który został w 100% stworzony w wirtualnej rzeczywistości przy użyciu komputerowych systemów projektowania trójwymiarowego CAD (system CATIA). Pozwoliło to wyelimować tradycyjny, niezwykle kosztowny proces budowania fizycznych, drewnianych lub gipsowych makiet kadłuba w skali 1:1. Komputery idealnie dopasowały do siebie miliony pojedynczych części z dokładnością do ułamków milimetra, co drastycznie przyspieszyło montaż pierwszego prototypu.</p>
+                            <h2>Potęga Napędu General Electric GE90</h2>
+                            <p>Elementem wyróżniającym wersje 777-200LR oraz najpopularniejszą 777-300ER są monumentalne silniki General Electric GE90-115B. Przez długi czas dzierżyły one oficjalny rekord Guinnessa jako najsilniejsze silniki odrzutowe w historii awiacji cywilnej, generując ciąg o wartości ponad 115 000 funtów. Sama średnica zewnętrzna obudowy tego silnika (ponad 3,4 metra) jest tak ogromna, że bez problemu zmieściłby się w niej cały kadłub wąskokadłubowego Boeinga 737. Najnowsza generacja, oznaczona jako <strong>777X</strong>, wprowadza innowacyjne, kompozytowe skrzydła ze składanymi końcówkami, umożliwiającymi poruszanie się po standardowych drogach kołowania.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wiki-article" id="art-b787">
+                    <div class="article-header">
+                        <h1>Boeing 787 Dreamliner (Era Kompozytów)</h1>
+                    </div>
+                    <div class="article-content">
+                        <div class="infobox">
+                            <div class="infobox-title">Boeing 787</div>
+                            <div class="blueprint-canvas">
+                                <svg width="100" height="100" viewBox="0 0 100 100" fill="none" stroke="#60a5fa" stroke-width="1.5"><path d="M50 5 L50 95 M4 35 Q50 42 96 35 M36 84 L64 84" opacity="0.4"/><path d="M22 37 L28 48 L32 38" stroke-width="1"/></svg>
+                            </div>
+                            <table>
+                                <tr><th>Klasa</th><td>Szerokokadłubowy średniej wielkości</td></tr>
+                                <tr><th>Pierwszy oblot</th><td>15 grudnia 2009</td></tr>
+                                <tr><th>Struktura kadłuba</th><td>50% czyste kompozyty (CFRP)</td></tr>
+                                <tr><th>Okna kabiny</th><td>Elektrochromowe (brak rolet)</td></tr>
+                            </table>
+                        </div>
+                        <div class="article-text">
+                            <p><strong>Boeing 787 Dreamliner</strong> to przełomowy, szerokokadłubowy samolot pasażerski średniej wielkości i dalekiego zasięgu, który zdefiniował standardy konstrukcyjne współczesnego lotnictwa cywilnego w XXI wieku. Założeniem inżynierów z Seattle nie było tym razem stworzenie maszyny większej czy szybszej, lecz skupienie się na bezprecedensowej efektywności paliwowej oraz rewolucyjnej poprawie komfortu podróżnych. Dreamliner jest pierwszym seryjnym samolem komercyjnym, w którym tradycyjne, nitowane poszycie z blach aluminiowych zostało całkowicie zastąpione przez monolityczne, "wypiekane" w wielkich piecach sekcje wykonane z polimerów zbrojonych włóknem węglowym (CFRP).</p>
+                            <h2>Innowacje Mikroklimatyczne w Kabinie</h2>
+                            <p>Zastosowanie zaawansowanych kompozytów węglowych, które wykazują stuprocentową odporność na korozję wywołaną wilgocią, pozwoliło na fundamentalne przeorganizowanie parametrów środowiskowych wewnątrz kabiny pasażerskiej. W klasycznych samolotach metalowych powietrze musi być skrajnie osuszane, aby chronić strukturę przed rdzewieniem. W Dreamlinerze wilgotność powietrza utrzymywana jest na poziomie blisko 15-12% (dwukrotnie wyższym niż w starszych maszynach). Co więcej, potężna wytrzymałość kadłuba kompozytowego pozwoliła na podniesienie ciśnienia w kabinie – odpowiada ono wysokości zaledwie 1800 metrów nad poziomem morza. Dzięki temu pasażerowie po kilkunastu godzinach lotu transoceanicznego budzą się bez bólów głowy i odczuwają znacznie mniejsze skutki jet-lagu.</p>
+                            <h2>Brak Rolet i Elektryczna Rewolucja Architektury</h2>
+                            <p>Kolejną unikalną wizytówką techniczną Dreamlinera są jego okna – o ponad 30% większe niż w jakimkolwiek innym samolocie tej klasy. Zrezygnowano w nich całkowicie z mechanicznych, plastikowych rolet na rzecz nowoczesnego systemu elektronicznego ściemniania. Szyba zawiera w środku warstwę specjalnego żelu elektrochromowego, który pod wpływem regulacji napięcia elektrycznego płynnie zmienia swoją polaryzację, przechodząc od pełnej przejrzystości do głębokiego, ciemnoniebieskiego koloru, skutecznie blokując promienie słoneczne bez zasłaniania widoków na zewnątrz.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div id="kategorie-section" class="brand-page">
+                <div class="article-header">
+                    <h1>Kategorie i Klasyfikacja Samolotów</h1>
+                </div>
+                <p style="margin-bottom: 25px; color: var(--text-muted);">Oficjalny podział zgromadzonych w rejestrze maszyn według ich architektury kadłuba oraz przeznaczenia operacyjnego:</p>
+                
+                <div class="category-grid">
+                    <div class="category-card">
+                        <h2>1. Wąskokadłubowe (Jednoalejkowe)</h2>
+                        <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 15px;">Przeznaczone do obsługi tras krótkiego i średniego zasięgu z jedną alejką pasażerską:</p>
+                        <ul class="article-text" style="list-style:none; margin:0; padding:0;">
+                            <li><strong>Airbus A220</strong> – Lekki liniowiec regionalny.</li>
+                            <li><strong>Airbus A320</strong> – Światowy bestseller z systemem Fly-by-wire.</li>
+                            <li><strong>Boeing 717</strong> – Konstrukcja z silnikami na ogonie (dawny MD-95).</li>
+                            <li><strong>Boeing 727</strong> – Historyczny klasyk trój silnikowy.</li>
+                            <li><strong>Boeing 737</strong> – Główny koń roboczy globalnych linii lotniczych.</li>
+                        </ul>
+                    </div>
+                    <div class="category-card">
+                        <h2>2. Szerokokadłubowe (Dwualejkowe)</h2>
+                        <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 15px;">Potężne statki powietrzne dedykowane do lotów międzykontynentalnych:</p>
+                        <ul class="article-text" style="list-style:none; margin:0; padding:0;">
+                            <li><strong>Airbus A340</strong> – Czterosilnikowy długodystansowiec.</li>
+                            <li><strong>Airbus A350 XWB</strong> – Konstrukcja oparta w większości na węglu.</li>
+                            <li><strong>Airbus A380 Superjumbo</strong> – Dwupokładowy król pojemności pasażerskiej.</li>
+                            <li><strong>Boeing 747 Jumbo Jet</strong> – Legendarna „Królowa Przestworzy” z garbem.</li>
+                            <li><strong>Boeing 777</strong> – Potężny, transoceaniczny dwusilnikowiec.</li>
+                            <li><strong>Boeing 787 Dreamliner</strong> – Nowoczesny i zaawansowany liniowiec kompozytowy.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+
+            <div id="spis-section" class="brand-page">
+                <div class="article-header">
+                    <h1>Zbiorczy Spis Parametrów Technicznych</h1>
+                </div>
+                <p style="margin-bottom: 25px; color: var(--text-muted);">Bezpośrednie, strukturyzowane porównanie parametrów inżynieryjnych wszystkich maszyn zarejestrowanych w systemie:</p>
+                
+                <div class="tech-table-container">
+                    <table class="tech-table">
+                        <thead>
+                            <tr>
+                                <th>Model Samolotu</th>
+                                <th>Producent</th>
+                                <th>Typ Architektury</th>
+                                <th>Data Oblotu</th>
+                                <th>Liczba Silników</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong>A220</strong></td><td>Airbus</td><td>Wąskokadłubowy</td><td>16.09.2013</td><td>2</td></tr>
+                            <tr><td><strong>A320</strong></td><td>Airbus</td><td>Wąskokadłubowy</td><td>22.02.1987</td><td>2</td></tr>
+                            <tr><td><strong>A340</strong></td><td>Airbus</td><td>Szerokokadłubowy</td><td>25.10.1991</td><td>4</td></tr>
+                            <tr><td><strong>A350 XWB</strong></td><td>Airbus</td><td>Szerokokadłubowy</td><td>14.06.2013</td><td>2</td></tr>
+                            <tr><td><strong>A380 Superjumbo</strong></td><td>Airbus</td><td>Szerokokadłubowy (2 pokłady)</td><td>27.04.2005</td><td>4</td></tr>
+                            <tr><td><strong>717</strong></td><td>Boeing</td><td>Wąskokadłubowy</td><td>02.09.1998</td><td>2</td></tr>
+                            <tr><td><strong>727</strong></td><td>Boeing</td><td>Wąskokadłubowy</td><td>09.02.1963</td><td>3</td></tr>
+                            <tr><td><strong>737</strong></td><td>Boeing</td><td>Wąskokadłubowy</td><td>09.04.1967</td><td>2</td></tr>
+                            <tr><td><strong>747 Jumbo Jet</strong></td><td>Boeing</td><td>Szerokokadłubowy</td><td>09.02.1969</td><td>4</td></tr>
+                            <tr><td><strong>777 Triple Seven</strong></td><td>Boeing</td><td>Szerokokadłubowy</td><td>12.06.1994</td><td>2</td></tr>
+                            <tr><td><strong>787 Dreamliner</strong></td><td>Boeing</td><td>Szerokokadłubowy</td><td>15.12.2009</td><td>2</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        var listaArtykulov = [
+            { id: 'art-a220', sekcja: 'airbus-section', btn: 'btn-airbus' },
+            { id: 'art-a320', sekcja: 'airbus-section', btn: 'btn-airbus' },
+            { id: 'art-a340', sekcja: 'airbus-section', btn: 'btn-airbus' },
+            { id: 'art-a350', sekcja: 'airbus-section', btn: 'btn-airbus' },
+            { id: 'art-a380', sekcja: 'airbus-section', btn: 'btn-airbus' },
+            { id: 'art-b717', sekcja: 'boeing-section', btn: 'btn-boeing' },
+            { id: 'art-b727', sekcja: 'boeing-section', btn: 'btn-boeing' },
+            { id: 'art-b737', sekcja: 'boeing-section', btn: 'btn-boeing' },
+            { id: 'art-b747', sekcja: 'boeing-section', btn: 'btn-boeing' },
+            { id: 'art-b777', sekcja: 'boeing-section', btn: 'btn-boeing' },
+            { id: 'art-b787', sekcja: 'boeing-section', btn: 'btn-boeing' }
+        ];
+
+        function resetSidebarActive() {
+            var items = document.getElementsByClassName('nav-item');
+            for(var i=0; i<items.length; i++) { items[i].classList.remove('active'); }
+        }
+
+        function zmienMarke(sekcjaId, kliknietyPrzycisk) {
+            document.getElementById('info-bar').style.display = 'none';
+            document.getElementById('main-brand-selector').style.display = 'flex';
+            resetSidebarActive();
+            document.getElementById('menu-home').classList.add('active');
+            
+            var artykuly = document.getElementsByClassName('wiki-article');
+            for(var k=0; k<artykuly.length; k++) { artykuly[k].style.display = 'block'; }
+
+            var strony = document.getElementsByClassName('brand-page');
+            for (var i = 0; i < strony.length; i++) { strony[i].classList.remove('active'); }
+            
+            var przyciski = document.getElementsByClassName('brand-tab');
+            for (var j = 0; j < przyciski.length; j++) { przyciski[j].classList.remove('active'); }
+            
+            document.getElementById(sekcjaId).classList.add('active');
+            if(kliknietyPrzycisk) kliknietyPrzycisk.classList.add('active');
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        function pokazStroneGlowna() {
+            zmienMarke('airbus-section', document.getElementById('btn-airbus'));
+        }
+
+        function losujArtykul() {
+            resetSidebarActive();
+            document.getElementById('menu-random').classList.add('active');
+            
+            var losowyIndeks = Math.floor(Math.random() * listaArtykulov.length);
+            var wybrany = listaArtykulov[losowyIndeks];
+
+            var strony = document.getElementsByClassName('brand-page');
+            for (var i = 0; i < strony.length; i++) { strony[i].classList.remove('active'); }
+            document.getElementById(wybrany.sekcja).classList.add('active');
+
+            document.getElementById('main-brand-selector').style.display = 'none';
+            document.getElementById('info-bar').style.display = 'flex';
+            
+            var naglowekTekst = document.getElementById(wybrany.id).querySelector('h1').innerText;
+            document.getElementById('info-text').innerHTML = "<span>🎲</span> Wylosowano profil: " + naglowekTekst;
+
+            var artykuly = document.getElementsByClassName('wiki-article');
+            for(var k=0; k<artykuly.length; k++) { artykuly[k].style.display = 'none'; }
+            document.getElementById(wybrany.id).style.display = 'block';
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        function filtrujSekcje(typ) {
+            resetSidebarActive();
+            document.getElementById('main-brand-selector').style.display = 'none';
+            document.getElementById('info-bar').style.display = 'flex';
+            
+            var strony = document.getElementsByClassName('brand-page');
+            for (var i = 0; i < strony.length; i++) { strony[i].classList.remove('active'); }
+
+            if (typ === 'kategorie') {
+                document.getElementById('menu-cat').classList.add('active');
+                document.getElementById('info-text').innerHTML = "<span>📂</span> Rejestr: Kategorie i Podziały Konstrukcji";
+                document.getElementById('kategorie-section').classList.add('active');
+            } else if (typ === 'spis') {
+                document.getElementById('menu-tech').classList.add('active');
+                document.getElementById('info-text').innerHTML = "<span>📋</span> Rejestr: Macierz Porównawcza Specyfikacji";
+                document.getElementById('spis-section').classList.add('active');
+            }
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+    </script>
+</body>
+</html>
